@@ -2,19 +2,39 @@
 // #include "/usr/include/libkern/OSAtomic.h"
 #import <libkern/OSAtomic.h>
 
+#define degreesToRadians(x) (M_PI * x / 180.0)
+#define radiandsToDegrees(x) (x * 180.0 / M_PI)
+
 @implementation GPSData
-@synthesize date, lat, lon, track, elipsoidHeight, seaHeight, groundSpeed, verticalAccurency, horizontalAccurency;
+@synthesize date, lat, lon, track, elipsoidAltitude, seaAltitude, groundSpeed, verticalAccurency, horizontalAccurency;
 
 - (NSString *) description {
     return [NSString stringWithFormat:@"%f %f", [self lat], [self lon]];
 }
 
 - (void) dealloc {
-    self.date = nil;
+    date = nil;
     [super dealloc];
 }
 
 @end
+
+@implementation StatusData
+
+@synthesize gpsStatus, batteryStatus, camerasStatus, date;
+
+- (NSString *) description {
+    return [NSString stringWithFormat:@"%i %i", gpsStatus, batteryStatus];
+}
+
+- (void) dealloc {
+    date = nil;
+    camerasStatus = nil;
+    [super dealloc];
+}
+
+@end
+
 
 @interface NavigatorWrapper ()
 
@@ -42,16 +62,6 @@ enum {
         [commThread start];  // Actually create the thread
     }
  
-//    if (testRunning == NO)
-//    {
-//        [startButton setTitle:STOP_STR forState:UIControlStateNormal];
-//        [self performSelector:@selector(startTest) onThread:commThread withObject:nil waitUntilDone:YES];
-//    }
-//    else
-//    {
-//        [startButton setTitle:START_STR forState:UIControlStateNormal];
-//        [self performSelector:@selector(stopTest) onThread:commThread withObject:nil waitUntilDone:YES];
-//    }
 }
 
 - (void) startCommThread:(id)object
@@ -73,20 +83,62 @@ enum {
 
 - (void) simulate: (NSDictionary*) simulationData
 {
+    [self start];
     [self performSelector:@selector(startSimulationTimer:) onThread:commThread withObject:simulationData waitUntilDone:NO];
 }
 
 - (void) initTestData: (NSDictionary*) simulationData
 {
     NSMutableArray* trackData = [[NSMutableArray alloc] init];
-    GPSData *data = [[GPSData alloc] init];
-    [trackData addObject:data];
-    testData = [NSArray arrayWithArray:trackData];
-//    [trackData release];
-//    NSDictionary* testDict = (NSDictionary*)testObj;
-    //data.lat = [testDict[@"lat"] doubleValue];
-    //data.lon = [testDict[@"lon"] doubleValue];
+    CLLocationSpeed speed = [simulationData[@"speed"] doubleValue];
+    if (!speed) speed = 100;
+    NSArray* data = (NSArray*) simulationData[@"data"];
+    for (int i=1;i<[data count];i++) {
+        NSDictionary* data1 = (NSDictionary*)data[i-1];
+        NSDictionary* data2 = (NSDictionary*)data[i];
+        CLLocationDistance alt1 = [data1[@"alt"] doubleValue];
+        CLLocationDistance alt2 = [data2[@"alt"] doubleValue];
+        CLLocationDegrees lat1 = [data1[@"lat"] doubleValue];
+        CLLocationDegrees lat2 = [data2[@"lat"] doubleValue];
+        CLLocationDegrees lon1 = [data1[@"lon"] doubleValue];
+        CLLocationDegrees lon2 = [data2[@"lon"] doubleValue];
+        CLLocation* point1 = [[CLLocation alloc] initWithLatitude:lat1 longitude:lon1];
+        CLLocation* point2 = [[CLLocation alloc] initWithLatitude:lat2 longitude:lon2];
+        CLLocationDistance distance = [point1 distanceFromLocation: point2];
+        int steps = distance / speed * 2;
+        for (int k=0; k<steps+1; k++) {
+            GPSData* data = [[GPSData alloc] init];
+            data.lat = lat1 + (lat2-lat1) * k / steps;
+            data.lon = lon1 + (lon2-lon1) * k / steps;
+            data.elipsoidAltitude = alt1 + (alt2-alt1) * k / steps;
+            data.seaAltitude = data.elipsoidAltitude * 1.01;
+            data.groundSpeed = speed;
+            data.track = [self getHeadingForDirectionFromCoordinate: point1.coordinate toCoordinate:point2.coordinate];
+            data.verticalAccurency = 1;
+            data.horizontalAccurency = 1;
+            [trackData addObject:data];
+        }
+        
+    }
     
+    testData = [[NSArray alloc] initWithArray:trackData];
+    NSLog(@"init test data by gps with %i points", [testData count]);
+}
+
+- (float)getHeadingForDirectionFromCoordinate:(CLLocationCoordinate2D)fromLoc toCoordinate:(CLLocationCoordinate2D)toLoc
+{
+    float fLat = degreesToRadians(fromLoc.latitude);
+    float fLng = degreesToRadians(fromLoc.longitude);
+    float tLat = degreesToRadians(toLoc.latitude);
+    float tLng = degreesToRadians(toLoc.longitude);
+    
+    float degree = radiandsToDegrees(atan2(sin(tLng-fLng)*cos(tLat), cos(fLat)*sin(tLat)-sin(fLat)*cos(tLat)*cos(tLng-fLng)));
+    
+    if (degree >= 0) {
+        return degree;
+    } else {
+        return 360+degree;
+    }
 }
 
 - (void) startSimulationTimer: (NSDictionary*) simulationData
@@ -115,7 +167,7 @@ enum {
         return;
     }
     id testObj = testData[testDataIndex++];
-    NSLog(@"test item %d %@", testDataIndex, testObj);
+    //NSLog(@"test item %d %@", testDataIndex, testObj);
     if ([testObj isKindOfClass:[GPSData class]]) {
         GPSData *data = (GPSData*) testObj;
         [self performSelectorOnMainThread:@selector(fireGPSData:) withObject:data waitUntilDone:NO];
@@ -124,12 +176,23 @@ enum {
         [readBuffer appendData:((NSData *)testObj)];
         [self parseReadBuffer];
     }
+    StatusData* statusData = [[StatusData alloc] init];
+    statusData.gpsStatus = 80;
+    statusData.batteryStatus = 83;
+    statusData.camerasStatus = @[@YES, @YES, @NO, @NO, @NO, @NO];
+    [self performSelectorOnMainThread:@selector(fireStatusData:) withObject:statusData waitUntilDone:NO];
 }
 
 - (void) fireGPSData:(GPSData*) data
 {
-    NSLog(@"Fire GPS data available message %@", data);
+    //NSLog(@"Fire GPS data available message %@", data);
     [[self delegate] newGPSDataAvailable:data];
+}
+
+- (void) fireStatusData:(StatusData*) data
+{
+    //NSLog(@"Fire GPS data available message %@", data);
+    [[self delegate] newStatusDataAvailable:data];
 }
 
 - (void) resetCounters

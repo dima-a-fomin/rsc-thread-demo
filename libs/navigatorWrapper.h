@@ -21,8 +21,8 @@
 @property(nonatomic) CLLocationDegrees lat;
 @property(nonatomic) CLLocationDegrees lon;
 @property(nonatomic) CLLocationDirection track; // true heading
-@property(nonatomic) CLLocationDistance elipsoidHeight; // meters
-@property(nonatomic) CLLocationDistance seaHeight;  // meters
+@property(nonatomic) CLLocationDistance elipsoidAltitude; // meters
+@property(nonatomic) CLLocationDistance seaAltitude;  // meters
 @property(nonatomic) CLLocationSpeed groundSpeed;  // meters per second
 @property(nonatomic) CLLocationAccuracy verticalAccurency;  // meters
 @property(nonatomic) CLLocationAccuracy horizontalAccurency;  // meters
@@ -34,10 +34,9 @@
 @interface StatusData : NSObject
 
 @property(nonatomic,readonly) NSDate* date;
-
-- (NSArray*)camerasStatus; // array with bools. length == count of installed cameras
-- (int) gpsStatus; // 0-100
-- (int) batteryStatus; // 0-100
+@property(nonatomic,retain) NSArray* camerasStatus; // array with bools. length == count of installed cameras
+@property(nonatomic) int gpsStatus; // 0-100
+@property(nonatomic) int batteryStatus; // 0-100
 
 - (NSString *)description; // should be used to store messages to log
 

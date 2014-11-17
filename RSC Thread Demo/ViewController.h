@@ -12,13 +12,13 @@
 
 @interface ViewController : UIViewController <NavigatorWrapperDelegate>
 {
-    IBOutlet UILabel *cableStateLabel;
-    IBOutlet UILabel *baudRateLabel;
-    IBOutlet UILabel *txLabel;
-    IBOutlet UILabel *rxLabel;
-    IBOutlet UILabel *errLabel;
-    IBOutlet UIButton *startButton;
     IBOutlet UILabel *coordinatesLabel;
+    IBOutlet UILabel *altitudeLabel;
+    IBOutlet UILabel *speedLabel;
+    IBOutlet UILabel *trackLabel;
+    IBOutlet UILabel *batterLabel;
+    IBOutlet UILabel *gpsStatusLabel;
+    IBOutlet UILabel *camerasLabel;
     BOOL cableConnected;
     NavigatorWrapper* navigatorWrapper;
 }
