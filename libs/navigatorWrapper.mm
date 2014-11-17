@@ -27,7 +27,7 @@ enum {
 
 @implementation NavigatorWrapper
 
-@synthesize rscMgr, delegate, testData;
+@synthesize delegate;
 
 - (void)start
 {
@@ -71,15 +71,35 @@ enum {
     [pool release];
 }
 
-- (void) simulate
+- (void) simulate: (NSDictionary*) simulationData
 {
-    testDataIndex = 0;
-    [self performSelector:@selector(startTimer) onThread:commThread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(startSimulationTimer:) onThread:commThread withObject:simulationData waitUntilDone:NO];
 }
 
-- (void) startTimer
+- (void) initTestData: (NSDictionary*) simulationData
 {
-    [simulationTimer invalidate];
+    NSMutableArray* trackData = [[NSMutableArray alloc] init];
+    GPSData *data = [[GPSData alloc] init];
+    [trackData addObject:data];
+    testData = [NSArray arrayWithArray:trackData];
+//    [trackData release];
+//    NSDictionary* testDict = (NSDictionary*)testObj;
+    //data.lat = [testDict[@"lat"] doubleValue];
+    //data.lon = [testDict[@"lon"] doubleValue];
+    
+}
+
+- (void) startSimulationTimer: (NSDictionary*) simulationData
+{
+    if ([simulationData[@"type"] isEqualToString: @"hex"]) {
+        testData = [(NSArray*)simulationData[@"data"] copy];
+//        NSLog(@"init test data with hex data %@", testData);
+    } else if ([simulationData[@"type"] isEqualToString: @"gps"]) {
+        [self initTestData:simulationData];
+    } else {
+        [NSException raise:@"Invalid simulation type" format:@"type of %@ is invalid", simulationData[@"type"]];
+    }
+    testDataIndex = 0;
     
     NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.5
                               target:self selector:@selector(handleTimer:)
@@ -89,18 +109,15 @@ enum {
 
 - (void)handleTimer:(NSTimer*)timer
 {
-    if (testDataIndex >= [[self testData] count]) {
+    if (testDataIndex >= [testData count]) {
         [simulationTimer invalidate];
         NSLog(@"We complete test data");
         return;
     }
-    id testObj = [self testData][testDataIndex++];
+    id testObj = testData[testDataIndex++];
     NSLog(@"test item %d %@", testDataIndex, testObj);
-    if ([testObj isKindOfClass:[NSDictionary class]]) {
-        NSDictionary* testDict = (NSDictionary*)testObj;
-        GPSData *data = [[GPSData alloc] init];
-        data.lat = [testDict[@"lat"] doubleValue];
-        data.lon = [testDict[@"lon"] doubleValue];
+    if ([testObj isKindOfClass:[GPSData class]]) {
+        GPSData *data = (GPSData*) testObj;
         [self performSelectorOnMainThread:@selector(fireGPSData:) withObject:data waitUntilDone:NO];
     }
     if ([testObj isKindOfClass:[NSData class]]) {
@@ -111,6 +128,7 @@ enum {
 
 - (void) fireGPSData:(GPSData*) data
 {
+    NSLog(@"Fire GPS data available message %@", data);
     [[self delegate] newGPSDataAvailable:data];
 }
 

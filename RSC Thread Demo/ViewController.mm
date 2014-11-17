@@ -25,7 +25,7 @@
     navigatorWrapper = [[NavigatorWrapper alloc] init];
     
     [navigatorWrapper setDelegate:self];
-    [self startTest];
+    [self startHexTest];
 }
 
 - (void)viewDidUnload
@@ -60,65 +60,28 @@
 
 - (IBAction)clickedStart:(id)sender
 {
-    if (testRunning == NO)
-    {
-        [startButton setTitle:STOP_STR forState:UIControlStateNormal];
-        [self startTest];
-    }
-    else
-    {
-        [startButton setTitle:START_STR forState:UIControlStateNormal];
-        [self stopTest];
-    }
+    [self startHexTest];
 }
 
-- (void) resetCounters
-{
-    txCount = rxCount = errCount = 0;
-    seqNum = 0;
-    testRunning = FALSE;
-}
 
 - (void) newStatusDataAvailable:(StatusData*)msg;
 
 {
-    [self updateStatus:nil];
+
 }
 
 - (void) newGPSDataAvailable:(GPSData*)msg;
 
 {
-        coordinatesLabel.text = [NSString stringWithFormat:@"%f %f", msg.lat, msg.lon];
+    coordinatesLabel.text = [NSString stringWithFormat:@"%f %f", msg.lat, msg.lon];
 }
 
-- (void) updateStatus:(id)object
+- (void) startGpsTest
 {
-    cableStateLabel.text = (cableConnected == YES) ? CONNECTED_STR : NOT_CONNECTED_STR;
-    
-    rxLabel.text = [NSString stringWithFormat:@"%d", rxCount];
-    txLabel.text = [NSString stringWithFormat:@"%d", txCount];
-    errLabel.text = [NSString stringWithFormat:@"%d", errCount];
-    
-    if (cableConnected)
-    {
-//        NSString *str = [NSString stringWithFormat:@"%d",
-//                         [rscMgr getBaud]];
-        
-        baudRateLabel.text = @"yes"; //str;
-    }
-    else
-    {
-        baudRateLabel.text = @"?";
-    }
 
 }
 
-- (void) startTest
-{
-    testRunning = YES;
-    seqNum = 0;
-//    navigatorWrapper.testData = @[@{@"lat": @100, @"lon": @200}, @{@"lat": @102, @"lon": @202}];
-    //NSMutableData* msg1 = [[NSMutableData alloc] init];
+- (void) startHexTest {
     UInt8 msg1[] = {
         0xb5,
         0x62,
@@ -137,23 +100,17 @@
         0x24, 0xDB, // check sum
         0xFF, 0xFF, 0xFF, 0xFF, //garbage
     };
-    navigatorWrapper.testData = @[[NSData dataWithBytes:msg1 length:37]];
     [navigatorWrapper start];
-    [navigatorWrapper simulate];
+
+    NSDictionary* simulationData = @{
+        @"type": @"hex",
+        @"data": @[[NSData dataWithBytes:msg1 length:37]]
+    };
+    [navigatorWrapper simulate: simulationData];
     NSLog(@"Start test");
 
-//    [rscMgr write:testData length:TEST_DATA_LEN];
-//    
-//    OSAtomicAdd32(TEST_DATA_LEN, &txCount);
-//    
-//    [self performSelectorOnMainThread:@selector(updateStatus:) withObject:nil waitUntilDone:NO];
-
 }
 
-- (void) stopTest
-{
-    testRunning = NO;
-}
 
 
 - (void)dealloc {

@@ -66,15 +66,12 @@
     UInt8 rxBuffer[1024];
     BOOL testRunning;
     NSTimer* simulationTimer;
+    NSArray* testData;
 }
 @property (nonatomic, retain) id delegate;
-@property (nonatomic, retain) NSArray* testData;
-@property (nonatomic, retain) RscMgr *rscMgr;
 
 - (void) start;
-- (void) simulate;
+- (void) simulate: (NSDictionary*) simulationData;
 
-- (void) startCommThread:(id)object;
-- (void) resetCounters;
 
 @end

@@ -14,7 +14,6 @@
 		3FE3BA4515E32F7000376C13 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3FE3BA4315E32F7000376C13 /* InfoPlist.strings */; };
 		3FE3BA4715E32F7000376C13 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3FE3BA4615E32F7000376C13 /* main.m */; };
 		3FE3BA4B15E32F7000376C13 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3FE3BA4A15E32F7000376C13 /* AppDelegate.m */; };
-		3FE3BA4E15E32F7000376C13 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3FE3BA4C15E32F7000376C13 /* MainStoryboard_iPhone.storyboard */; };
 		3FE3BA5115E32F7000376C13 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3FE3BA4F15E32F7000376C13 /* MainStoryboard_iPad.storyboard */; };
 		3FE3BA5415E32F7000376C13 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3FE3BA5315E32F7000376C13 /* ViewController.mm */; };
 		844D677819EF1629002CD204 /* libRscMgrUniv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844D677519EF1629002CD204 /* libRscMgrUniv.a */; };
@@ -33,7 +32,6 @@
 		3FE3BA4815E32F7000376C13 /* RSC Thread Demo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RSC Thread Demo-Prefix.pch"; sourceTree = "<group>"; };
 		3FE3BA4915E32F7000376C13 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3FE3BA4A15E32F7000376C13 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		3FE3BA4D15E32F7000376C13 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		3FE3BA5015E32F7000376C13 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
 		3FE3BA5215E32F7000376C13 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		3FE3BA5315E32F7000376C13 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
@@ -94,7 +92,6 @@
 			children = (
 				3FE3BA4915E32F7000376C13 /* AppDelegate.h */,
 				3FE3BA4A15E32F7000376C13 /* AppDelegate.m */,
-				3FE3BA4C15E32F7000376C13 /* MainStoryboard_iPhone.storyboard */,
 				3FE3BA4F15E32F7000376C13 /* MainStoryboard_iPad.storyboard */,
 				3FE3BA5215E32F7000376C13 /* ViewController.h */,
 				3FE3BA5315E32F7000376C13 /* ViewController.mm */,
@@ -183,7 +180,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3FE3BA4515E32F7000376C13 /* InfoPlist.strings in Resources */,
-				3FE3BA4E15E32F7000376C13 /* MainStoryboard_iPhone.storyboard in Resources */,
 				3FE3BA5115E32F7000376C13 /* MainStoryboard_iPad.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,14 +207,6 @@
 				3FE3BA4415E32F7000376C13 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		3FE3BA4C15E32F7000376C13 /* MainStoryboard_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3FE3BA4D15E32F7000376C13 /* en */,
-			);
-			name = MainStoryboard_iPhone.storyboard;
 			sourceTree = "<group>";
 		};
 		3FE3BA4F15E32F7000376C13 /* MainStoryboard_iPad.storyboard */ = {
